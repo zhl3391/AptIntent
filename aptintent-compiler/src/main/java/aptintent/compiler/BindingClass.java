@@ -32,7 +32,7 @@ final class BindingClass {
 
         TypeSpec.Builder targetClass = TypeSpec.classBuilder(mBinderClassName)
                 .addSuperinterface(ParameterizedTypeName.get(BINDER, mTargetTypeName))
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         MethodSpec.Builder method = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.PUBLIC)

@@ -6,6 +6,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -19,6 +20,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
@@ -29,6 +31,9 @@ import aptintent.annotation.CreateIntent;
 import aptintent.annotation.Extra;
 import aptintent.annotation.ExtraField;
 
+import static javax.lang.model.element.ElementKind.CLASS;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static aptintent.compiler.UsedClassName.*;
 
@@ -128,14 +133,22 @@ public class AptIntentProcessor extends AbstractProcessor{
 
     private void parseBindingClass(RoundEnvironment roundEnv) {
         Map<TypeElement, BindingClass> targetClassMap = new LinkedHashMap<>();
+        boolean hasError = false;
         for (Element element : roundEnv.getElementsAnnotatedWith(ExtraField.class)) {
+            hasError = isInaccessibleViaGeneratedCode(ExtraField.class, "fields", element);
+            if (hasError) {
+                break;
+            }
             TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
             BindingClass bindingClass = getOrCreateBindingClass(targetClassMap, enclosingElement);
             String keyName = element.getAnnotation(ExtraField.class).value();
             String fieldName = element.getSimpleName().toString();
             TypeName typeName = TypeName.get(element.asType());
             bindingClass.addTargetField(new TargetField(keyName, fieldName, typeName));
+        }
 
+        if (hasError) {
+            return;
         }
 
         for (Map.Entry<TypeElement, BindingClass> entry : targetClassMap.entrySet()) {
@@ -200,4 +213,36 @@ public class AptIntentProcessor extends AbstractProcessor{
         processingEnv.getMessager().printMessage(ERROR, message, element);
     }
 
+    private boolean isInaccessibleViaGeneratedCode(Class<? extends Annotation> annotationClass,
+                                                   String targetThing, Element element) {
+        boolean hasError = false;
+        TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
+
+        // Verify method modifiers.
+        Set<Modifier> modifiers = element.getModifiers();
+        if (modifiers.contains(PRIVATE) || modifiers.contains(STATIC)) {
+            error(element, "@%s %s must not be private or static. (%s.%s)",
+                    annotationClass.getSimpleName(), targetThing, enclosingElement.getQualifiedName(),
+                    element.getSimpleName());
+            hasError = true;
+        }
+
+        // Verify containing type.
+        if (enclosingElement.getKind() != CLASS) {
+            error(enclosingElement, "@%s %s may only be contained in classes. (%s.%s)",
+                    annotationClass.getSimpleName(), targetThing, enclosingElement.getQualifiedName(),
+                    element.getSimpleName());
+            hasError = true;
+        }
+
+        // Verify containing class visibility is not private.
+        if (enclosingElement.getModifiers().contains(PRIVATE)) {
+            error(enclosingElement, "@%s %s may not be contained in private classes. (%s.%s)",
+                    annotationClass.getSimpleName(), targetThing, enclosingElement.getQualifiedName(),
+                    element.getSimpleName());
+            hasError = true;
+        }
+
+        return hasError;
+    }
 }
