@@ -41,8 +41,8 @@ final class BindingClass {
                 .addStatement("if (bundle == null) return");
 
         for (TargetField targetField : mTargetFieldList) {
-            method.addStatement("target.$L = ($T) bundle.get($S)",
-                    targetField.fieldName, targetField.typeName, targetField.keyName);
+            method.addStatement("if (bundle.containsKey($S)) target.$L = ($T) bundle.get($S)",
+                    targetField.keyName, targetField.fieldName, targetField.typeName, targetField.keyName);
         }
 
         targetClass.addMethod(method.build());

@@ -11,7 +11,15 @@
     tools:context="com.zhl.aptintent.MainActivity">
 
     <Button
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="jump"
         android:onClick="jump"/>
+
+    <TextView
+        android:id="@+id/tv_extras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button"/>
 </RelativeLayout>

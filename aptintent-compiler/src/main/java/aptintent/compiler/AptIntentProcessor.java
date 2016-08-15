@@ -18,14 +18,19 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import aptintent.annotation.CreateIntent;
-import aptintent.annotation.Field;
+import aptintent.annotation.Extra;
+import aptintent.annotation.ExtraField;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
+import static aptintent.compiler.UsedClassName.*;
 
 @AutoService(Processor.class)
 public class AptIntentProcessor extends AbstractProcessor{
@@ -46,7 +51,7 @@ public class AptIntentProcessor extends AbstractProcessor{
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> annotationTypes = new LinkedHashSet<>();
         annotationTypes.add(CreateIntent.class.getCanonicalName());
-        annotationTypes.add(Field.class.getCanonicalName());
+        annotationTypes.add(ExtraField.class.getCanonicalName());
         return annotationTypes;
     }
 
@@ -58,20 +63,79 @@ public class AptIntentProcessor extends AbstractProcessor{
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         parseBindingClass(roundEnv);
+        parseCreator(roundEnv);
 
         return true;
     }
 
+    private TypeName getTargetTypeName(Element element) {
+        TypeElement typeElement = null;
+        try {
+            element.getAnnotation(CreateIntent.class).value();
+        } catch (MirroredTypeException e) {
+            typeElement = (TypeElement) mTypeUtils.asElement(e.getTypeMirror());
+        }
+
+        if (typeElement != null) {
+            return ClassName.get(typeElement);
+        }
+
+        return null;
+    }
+
+    private void parseCreator(RoundEnvironment roundEnv) {
+        Map<TypeElement, CreatorClass> creatorClassMap = new LinkedHashMap<>();
+        for (Element element : roundEnv.getElementsAnnotatedWith(CreateIntent.class)) {
+            TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
+            CreatorClass creatorClass = getOrCreateCreatorClass(creatorClassMap, enclosingElement);
+            String methodName = element.getSimpleName().toString();
+            TypeName targetTypeName = getTargetTypeName(element);
+            if (targetTypeName == null) {
+                error(element, "Unable to get class value");
+                break;
+            }
+            CreatorMethod creatorMethod = new CreatorMethod(targetTypeName, INTENT, methodName);
+            boolean isHasContext = false;
+            for (VariableElement variableElement : ((ExecutableElement)element).getParameters()) {
+                Extra extra = variableElement.getAnnotation(Extra.class);
+                String keyName = null;
+                if (extra != null) {
+                    keyName = extra.value();
+                }
+                String fieldName = variableElement.getSimpleName().toString();
+                TypeName typeName = TypeName.get(variableElement.asType());
+                if (typeName.toString().equals(CONTEXT.toString())) {
+                    isHasContext = true;
+                }
+                TargetField field = new TargetField(keyName, fieldName, typeName);
+                creatorMethod.paramList.add(field);
+            }
+            if (!isHasContext) {
+                error(element, "the method : %s() must have android.content.Context", methodName);
+            }
+            creatorClass.addCreatorMethod(creatorMethod);
+        }
+
+        for (Map.Entry<TypeElement, CreatorClass> entry : creatorClassMap.entrySet()) {
+            try {
+                entry.getValue().brewJava().writeTo(mFiler);
+            } catch (IOException e) {
+                error(entry.getKey(), "Unable to write CreatorClass for type %s: %s", entry.getKey(),
+                        e.getMessage());
+            }
+        }
+    }
+
     private void parseBindingClass(RoundEnvironment roundEnv) {
         Map<TypeElement, BindingClass> targetClassMap = new LinkedHashMap<>();
-        for (Element element : roundEnv.getElementsAnnotatedWith(Field.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(ExtraField.class)) {
             TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
             BindingClass bindingClass = getOrCreateBindingClass(targetClassMap, enclosingElement);
-            String keyName = element.getAnnotation(Field.class).value();
+            String keyName = element.getAnnotation(ExtraField.class).value();
             String fieldName = element.getSimpleName().toString();
             TypeName typeName = TypeName.get(element.asType());
             bindingClass.addTargetField(new TargetField(keyName, fieldName, typeName));
-            targetClassMap.put(enclosingElement, bindingClass);
+
         }
 
         for (Map.Entry<TypeElement, BindingClass> entry : targetClassMap.entrySet()) {
@@ -82,6 +146,24 @@ public class AptIntentProcessor extends AbstractProcessor{
                         e.getMessage());
             }
         }
+    }
+
+    private CreatorClass getOrCreateCreatorClass(Map<TypeElement, CreatorClass> creatorClassMap,
+                                                 TypeElement enclosingElement) {
+        CreatorClass creatorClass = creatorClassMap.get(enclosingElement);
+        if (creatorClass == null) {
+            TypeName superInterface = TypeName.get(enclosingElement.asType());
+            if (superInterface instanceof ParameterizedTypeName) {
+                superInterface = ((ParameterizedTypeName) superInterface).rawType;
+            }
+            String packageName = getPackageName(enclosingElement);
+            String className = getClassName(enclosingElement, packageName);
+            ClassName creatorClassName = ClassName.get(packageName, className + "_Imp");
+            creatorClass = new CreatorClass(superInterface, creatorClassName);
+            creatorClassMap.put(enclosingElement, creatorClass);
+        }
+
+        return creatorClass;
     }
 
     private BindingClass getOrCreateBindingClass(Map<TypeElement, BindingClass> targetClassMap,
@@ -96,6 +178,7 @@ public class AptIntentProcessor extends AbstractProcessor{
             String className = getClassName(enclosingElement, packageName);
             ClassName binderClassName = ClassName.get(packageName, className + "_Binder");
             bindingClass = new BindingClass(targetType, binderClassName);
+            targetClassMap.put(enclosingElement, bindingClass);
         }
 
         return bindingClass;
@@ -116,4 +199,5 @@ public class AptIntentProcessor extends AbstractProcessor{
         }
         processingEnv.getMessager().printMessage(ERROR, message, element);
     }
+
 }
