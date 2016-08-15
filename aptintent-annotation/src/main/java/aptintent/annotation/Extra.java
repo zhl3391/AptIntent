@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * the extra name will be inferred form the annotated element
  */
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.FIELD)
+@Target(ElementType.PARAMETER)
 public @interface Extra {
     String value();
 }

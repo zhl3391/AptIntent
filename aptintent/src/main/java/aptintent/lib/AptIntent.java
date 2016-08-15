@@ -1,6 +1,6 @@
 package aptintent.lib;
 
-public class AptIntent {
+public final class AptIntent {
 
     public static void bind(Object target) {
         String clsName = target.getClass().getName();
@@ -16,5 +16,25 @@ public class AptIntent {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    public static <T> T create(Class<T> interfaceClass) {
+        String clsName = interfaceClass.getName();
+
+        T instance = null;
+
+        try {
+            Class<?> clazz = Class.forName(clsName + "_Imp");
+            //noinspection unchecked
+            instance =  (T) clazz.newInstance();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return instance;
     }
 }
