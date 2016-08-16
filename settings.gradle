@@ -1,1 +1,1 @@
-include ':app', ':aptintent-annotation', ':aptintent-compiler', ':aptintent'
+include ':app', ':aptintent-compiler', ':aptintent'

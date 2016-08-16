@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import aptintent.annotation.ExtraField;
+import aptintent.lib.ExtraField;
 import aptintent.lib.AptIntent;
 
 import static com.zhl.aptintent.IntentCreator.*;

@@ -1,4 +1,4 @@
-package aptintent.annotation;
+package aptintent.lib;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

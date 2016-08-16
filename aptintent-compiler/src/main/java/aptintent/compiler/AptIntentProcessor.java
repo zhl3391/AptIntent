@@ -27,9 +27,9 @@ import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import aptintent.annotation.CreateIntent;
-import aptintent.annotation.Extra;
-import aptintent.annotation.ExtraField;
+import aptintent.lib.CreateIntent;
+import aptintent.lib.Extra;
+import aptintent.lib.ExtraField;
 
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.PRIVATE;

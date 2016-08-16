@@ -3,8 +3,8 @@ package com.zhl.aptintent;
 import android.content.Context;
 import android.content.Intent;
 
-import aptintent.annotation.CreateIntent;
-import aptintent.annotation.Extra;
+import aptintent.lib.CreateIntent;
+import aptintent.lib.Extra;
 
 /**
  * Created by zhl on 16/8/14.
