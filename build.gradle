@@ -8,6 +8,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:2.1.2'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+        classpath 'com.novoda:bintray-release:0.3.4'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -21,4 +22,14 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+ext {
+    userOrg = 'zhl3391'
+    groupId = 'com.zhl'
+    uploadName = 'aptintent'
+    publishVersion = '1.0.0'
+    desc = 'an annotation lib to create intent with extras and get extras '
+    website = 'https://github.com/zhl3391/AptIntent'
+    licences = ['Apache-2.0']
 }
