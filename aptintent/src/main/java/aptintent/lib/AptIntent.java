@@ -17,11 +17,7 @@ public final class AptIntent {
                 //noinspection unchecked
                 binder = (Binder<Object>) bindClass.newInstance();
                 BINDER.put(target.getClass(), binder);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Unable to create binder for " + clsName, e);
-            } catch (InstantiationException e) {
-                throw new RuntimeException("Unable to create binder for " + clsName, e);
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Unable to create binder for " + clsName, e);
             }
         }
@@ -45,11 +41,7 @@ public final class AptIntent {
             Class<?> clazz = Class.forName(clsName + "_Imp");
             instance = clazz.newInstance();
             CREATOR.put(interfaceClass, instance);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Unable to create creator for " + clsName, e);
-        } catch (InstantiationException e) {
-            throw new RuntimeException("Unable to create creator for " + clsName, e);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Unable to create creator for " + clsName, e);
         }
         //noinspection unchecked
