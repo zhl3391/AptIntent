@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import static aptintent.compiler.UsedClassName.BUNDLE;
 import static aptintent.compiler.UsedClassName.INTENT;
 
 final class CreatorClass {
@@ -42,6 +43,9 @@ final class CreatorClass {
                 method.addParameter(parameter.typeName, parameter.fieldName);
                 if (parameter.keyName != null) {
                     method.addStatement("intent.putExtra($S, $N)", parameter.keyName, parameter.fieldName);
+                } else if (parameter.typeName.toString().equals(BUNDLE.toString())) {
+                    //如果是没有注解的Bundle,调用intent.putExtras(Bundle);
+                    method.addStatement("intent.putExtras($N)", parameter.fieldName);
                 }
             }
             method.addStatement("return intent");

@@ -104,11 +104,11 @@ public class AptIntentProcessor extends AbstractProcessor{
             for (VariableElement variableElement : ((ExecutableElement)element).getParameters()) {
                 Extra extra = variableElement.getAnnotation(Extra.class);
                 String keyName = null;
+                String fieldName = variableElement.getSimpleName().toString();
+                TypeName typeName = TypeName.get(variableElement.asType());
                 if (extra != null) {
                     keyName = extra.value();
                 }
-                String fieldName = variableElement.getSimpleName().toString();
-                TypeName typeName = TypeName.get(variableElement.asType());
                 if (typeName.toString().equals(CONTEXT.toString())) {
                     isHasContext = true;
                 }

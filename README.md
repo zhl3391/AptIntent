@@ -40,17 +40,21 @@ dependencies {
 ```java
 public interface IntentCreator {
 
-    String KEY_STRING   = "string";
-    String KEY_INT      = "int";
-    String KEY_BOOLEAN  = "boolean";
-    String KEY_OBJECT   = "object";
+    String KEY_STRING       = "string";
+    String KEY_INT          = "int";
+    String KEY_BOOLEAN      = "boolean";
+    String KEY_OBJECT       = "object";
+    String KEY_ARRAY_LIST   = "array_list";
+    String KEY_BUNDLE       = "bundle";
 
     @CreateIntent(MainActivity.class)
     Intent mainActivityIntent(Context context,
+                              Bundle bundle,
                               @Extra(KEY_STRING)String stringTest,
                               @Extra(KEY_INT) int intTest,
                               @Extra(KEY_BOOLEAN) boolean booleanTest,
-                              @Extra(KEY_OBJECT) ObjectTest objectTest);
+                              @Extra(KEY_OBJECT) ObjectTest objectTest,
+                              @Extra(KEY_ARRAY_LIST) ArrayList<String> arrayListTest);
 }
 ```
 
@@ -70,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
     boolean mBooleanTest;
     @ExtraField(KEY_OBJECT)
     ObjectTest mObjectTest;
+    @ExtraField(KEY_ARRAY_LIST)
+    ArrayList<String> mArrayListTest;
+    @ExtraField(KEY_BUNDLE)
+    String mBundleTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +88,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void jump(View view) {
-        startActivity(AptIntent.create(IntentCreator.class).mainActivityIntent(this, "haha", 888, true, new ObjectTest()));
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("arrayList");
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_BUNDLE, "bundle");
+        Intent intent = AptIntent.create(IntentCreator.class).mainActivityIntent(this,
+                bundle, "haha", 888, true, new ObjectTest(), arrayList);
+        startActivity(intent);
     }
 }
 ```
