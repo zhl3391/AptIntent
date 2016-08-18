@@ -8,6 +8,8 @@ AptIntent是一个Android平台基于annotation的库，其目的是简化创建
 
 1.添加依赖
 
+注：依赖还有问题，不知为什么两个库都提交了，但是工作人员没有把compiler的库加到jcenter，如果有人知道如何解决麻烦告诉我，谢谢！
+
 Gradle
 
 在你的工程目录下的`build.gradle`添加`android-apt`插件：
