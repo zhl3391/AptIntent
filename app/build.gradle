@@ -24,8 +24,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.1.1'
-//    compile 'com.zhl:aptintent-api:1.0.0'
-//    apt 'com.zhl:aptintent-compiler:1.0.0'
-    compile project(':aptintent')
-    apt project(':aptintent-compiler')
+    compile 'com.github.zhl3391.AptIntent:aptintent:1.0.1'
+    apt 'com.github.zhl3391.AptIntent:aptintent-compiler:1.0.1'
+//    compile project(':aptintent')
+//    apt project(':aptintent-compiler')
 }

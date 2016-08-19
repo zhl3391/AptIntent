@@ -1,6 +1,7 @@
 # AptIntent
 
 [![Build Status](https://travis-ci.org/zhl3391/AptIntent.svg?branch=master)](https://travis-ci.org/zhl3391/AptIntent)
+[![](https://www.jitpack.io/v/zhl3391/AptIntent.svg)](https://www.jitpack.io/#zhl3391/AptIntent)
 
 AptIntent是一个Android平台基于annotation的库，其目的是简化创建带数据的Intent和获取Intent内的数据。
 
@@ -8,19 +9,25 @@ AptIntent是一个Android平台基于annotation的库，其目的是简化创建
 
 1.添加依赖
 
-注：依赖还有问题，不知为什么两个库都提交了，但是工作人员没有把compiler的库加到jcenter，如果有人知道如何解决麻烦告诉我，谢谢！
-
 Gradle
 
-在你的工程目录下的`build.gradle`添加`android-apt`插件：
+在你的工程目录下的`build.gradle`添加`android-apt`插件,添加`jitpack`的`maven`库：
 ```groovy
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
+    	...
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
+}
+
+allprojects {
+	repositories {
+		...
+		maven { url "https://www.jitpack.io" }
+	}
 }
 ```
 然后在你的模块下的`build.gradle`应用`android-apt`插件，添加AptIntent依赖：
@@ -32,8 +39,8 @@ android {
 }
 
 dependencies {
-	compile 'com.zhl:aptintent-api:1.0.0'
-	apt 'com.zhl:aptintent-compiler:1.0.0'
+	compile 'com.github.zhl3391.AptIntent:aptintent:1.0.1'
+	apt 'com.github.zhl3391.AptIntent:aptintent-compiler:1.0.1'
 }
 ```
 
