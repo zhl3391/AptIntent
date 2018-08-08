@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 24
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
         applicationId "com.zhl.aptintent"
