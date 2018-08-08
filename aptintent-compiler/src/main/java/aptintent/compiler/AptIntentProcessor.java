@@ -30,12 +30,15 @@ import javax.lang.model.util.Types;
 import aptintent.lib.CreateIntent;
 import aptintent.lib.Extra;
 import aptintent.lib.ExtraField;
+import aptintent.lib.NecessaryField;
+import aptintent.lib.OptionField;
 
+import static aptintent.compiler.UsedClassName.CONTEXT;
+import static aptintent.compiler.UsedClassName.INTENT;
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static aptintent.compiler.UsedClassName.*;
 
 @AutoService(Processor.class)
 public class AptIntentProcessor extends AbstractProcessor{
@@ -145,6 +148,35 @@ public class AptIntentProcessor extends AbstractProcessor{
             String fieldName = element.getSimpleName().toString();
             TypeName typeName = TypeName.get(element.asType());
             bindingClass.addTargetField(new TargetField(keyName, fieldName, typeName));
+        }
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(NecessaryField.class)) {
+            hasError = isInaccessibleViaGeneratedCode(NecessaryField.class, "fields", element);
+            if (hasError) {
+                break;
+            }
+            TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
+            BindingClass bindingClass = getOrCreateBindingClass(targetClassMap, enclosingElement);
+            String keyName = element.getAnnotation(NecessaryField.class).value();
+            String fieldName = element.getSimpleName().toString();
+            TypeName typeName = TypeName.get(element.asType());
+            TargetField targetField = new TargetField(keyName, fieldName, typeName);
+            targetField.isNecessary = true;
+            bindingClass.addTargetField(targetField);
+        }
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(OptionField.class)) {
+            hasError = isInaccessibleViaGeneratedCode(OptionField.class, "fields", element);
+            if (hasError) {
+                break;
+            }
+            TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
+            BindingClass bindingClass = getOrCreateBindingClass(targetClassMap, enclosingElement);
+            String keyName = element.getAnnotation(OptionField.class).value();
+            String fieldName = element.getSimpleName().toString();
+            TypeName typeName = TypeName.get(element.asType());
+            TargetField targetField = new TargetField(keyName, fieldName, typeName);
+            bindingClass.addTargetField(targetField);
         }
 
         if (hasError) {

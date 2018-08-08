@@ -1,23 +1,30 @@
 package com.zhl.aptintent;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import aptintent.lib.ExtraField;
 import aptintent.lib.AptIntent;
+import aptintent.lib.ExtraField;
+import aptintent.lib.NecessaryField;
+import aptintent.lib.OptionField;
 
-import static com.zhl.aptintent.IntentCreator.*;
+import static com.zhl.aptintent.IntentCreator.KEY_ARRAY_LIST;
+import static com.zhl.aptintent.IntentCreator.KEY_BOOLEAN;
+import static com.zhl.aptintent.IntentCreator.KEY_BUNDLE;
+import static com.zhl.aptintent.IntentCreator.KEY_INT;
+import static com.zhl.aptintent.IntentCreator.KEY_OBJECT;
+import static com.zhl.aptintent.IntentCreator.KEY_STRING;
 
 public class MainActivity extends AppCompatActivity {
 
-    @ExtraField(KEY_STRING)
+    @NecessaryField(KEY_STRING)
     String mStringTest;
-    @ExtraField(KEY_INT)
+    @OptionField(KEY_INT)
     int mIntTest;
     @ExtraField(KEY_BOOLEAN)
     boolean mBooleanTest;
@@ -63,8 +70,10 @@ public class MainActivity extends AppCompatActivity {
         arrayList.add("arrayList");
         Bundle bundle = new Bundle();
         bundle.putString(KEY_BUNDLE, "bundle");
+//        Intent intent = AptIntent.create(IntentCreator.class).mainActivityIntent(this,
+//                bundle, null, 888, true, new ObjectTest(), arrayList);
         Intent intent = AptIntent.create(IntentCreator.class).mainActivityIntent(this,
-                bundle, "haha", 888, true, new ObjectTest(), arrayList);
+                bundle, "德玛西亚", true, new ObjectTest(), arrayList);
         startActivity(intent);
     }
 }
