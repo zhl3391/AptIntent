@@ -29,7 +29,7 @@ ext {
     userOrg = 'zhl3391'
     groupId = 'com.zhl'
     uploadName = 'aptintent'
-    publishVersion = '1.0.2'
+    publishVersion = '1.0.3'
     desc = 'an annotation lib to create intent with extras and get extras '
     website = 'https://github.com/zhl3391/AptIntent'
     licences = ['Apache-2.0']
