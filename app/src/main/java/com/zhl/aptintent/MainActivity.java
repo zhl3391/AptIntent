@@ -76,4 +76,10 @@ public class MainActivity extends AppCompatActivity {
                 bundle, "德玛西亚", true, new ObjectTest(), arrayList);
         startActivity(intent);
     }
+
+    public void jump2(View view) {
+//        startActivity(NecessaryFieldTestActivity.createIntent(this));
+        startActivity(NecessaryFieldTestActivity.createIntent2(this));
+    }
+
 }
