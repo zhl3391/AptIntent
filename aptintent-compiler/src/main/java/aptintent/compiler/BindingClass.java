@@ -37,8 +37,13 @@ final class BindingClass {
         MethodSpec.Builder method = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(mTargetTypeName, "target")
-                .addStatement("$T bundle = $N.getIntent().getExtras()", BUNDLE, "target")
-                .addStatement("if (bundle == null) return");
+                .addStatement("$T bundle = $N.getIntent().getExtras()", BUNDLE, "target");
+        if (hasNecessaryField()) {
+            method.addStatement("if (bundle == null){ $T.makeText($N, \"bundle is empty\", $T.LENGTH_SHORT).show(); return;} ",
+                    TOAST, "target", TOAST);
+        } else {
+            method.addStatement("if (bundle == null) return;");
+        }
 
         for (TargetField targetField : mTargetFieldList) {
             if (targetField.isNecessary) {
@@ -51,10 +56,19 @@ final class BindingClass {
             }
         }
 
-
         targetClass.addMethod(method.build());
 
         return JavaFile.builder(mBinderClassName.packageName(), targetClass.build())
                 .addFileComment("Generated code from AptIntent. Do not modify!").build();
     }
+
+    private boolean hasNecessaryField() {
+        for (TargetField targetField : mTargetFieldList) {
+            if (targetField.isNecessary) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
